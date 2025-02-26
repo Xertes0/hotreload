@@ -22,7 +22,7 @@ bool should_reload;
 static void open_and_load()
 {
 	/* RTLD_NOW instead of LAZY? */
-	dlhandle = dlopen("libgame.so", RTLD_LAZY);
+	dlhandle = dlopen("src/.libs/libgame.so", RTLD_LAZY);
 	if (!dlhandle) {
 		fprintf(stderr, "%s\n", dlerror());
 		exit(1);
@@ -122,7 +122,6 @@ void hotreload_check()
 		printf("RELOADING...\n");
 		dlclose(dlhandle);
 		open_and_load();
-		printf("RELOADED\n");
 	}
 }
 
