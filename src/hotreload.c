@@ -19,6 +19,10 @@ pthread_t watch_thread;
 /* Do I need atomic when only one thread writes to this? */
 bool should_reload;
 
+/* It is easier to make state_g a pointer to this buffer than to make a
+ * copy of state and then replace it after reload. */
+char state_buff[sizeof(struct game_state)] = {0};
+
 static void open_and_load()
 {
 	/* RTLD_NOW instead of LAZY? */
@@ -31,13 +35,20 @@ static void open_and_load()
 
 	char *error = NULL;
 
-	*(void **) (&main_loop) = dlsym(dlhandle, "main_loop");
+#define ASSIGN(NAME) \
+	*(void **) (&NAME) = dlsym(dlhandle, #NAME);	\
+	error = dlerror();				\
+	if (error != NULL) {				\
+		fprintf(stderr, "%s\n", error);		\
+		exit(1);				\
+	}						\
 
-	error = dlerror();
-	if (error != NULL) {
-		fprintf(stderr, "%s\n", error);
-		exit(1);
-	}
+	ASSIGN(game_tick);
+	ASSIGN(state_g);
+
+#undef ASSIGN
+
+	*state_g = (struct game_state *) state_buff;
 }
 
 static void *watch_events(void *data)
@@ -51,6 +62,13 @@ static void *watch_events(void *data)
 
 	for (;;) {
 		int size = read(inotify_fd, buf, sizeof(buf));
+		if (size == -1 && errno == EBADF) {
+			fprintf(stderr,
+				"read(inotify_fd): EBADF; "
+				"File descriptor was probably closed. Stopping watch_events() loop.\n");
+			break;
+		}
+
 		if (size == -1 && errno != EAGAIN) {
 			perror("inotify_fd read");
 			exit(1);

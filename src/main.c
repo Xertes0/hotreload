@@ -15,7 +15,7 @@ int main()
 
 	while (!WindowShouldClose()) {
 		hotreload_check();
-		main_loop();
+		game_tick();
 	}
 
 	CloseWindow();

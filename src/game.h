@@ -13,7 +13,13 @@
 #define EXT extern
 #endif
 
-EXT void PTR(main_loop)();
+struct game_state {
+	int counter;
+};
+
+EXT struct game_state PTR(*state_g);
+
+EXT void PTR(game_tick)();
 
 #undef PTR
 #undef EXT
