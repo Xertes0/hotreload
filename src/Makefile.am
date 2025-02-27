@@ -1,4 +1,7 @@
-AM_CFLAGS = -Wall -Wextra -Werror -pedantic
+sanitizers = -fsanitize=address,leak,undefined
+
+AM_CFLAGS = -Wall -Wextra -Werror -pedantic -ggdb -Og $(sanitizers)
+AM_LDFLAGS = $(sanitizers)
 
 lib_LTLIBRARIES = libgame.la
 libgame_la_SOURCES = game.c
