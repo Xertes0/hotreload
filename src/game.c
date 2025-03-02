@@ -5,7 +5,8 @@
 #define HOTRELOAD_DO_DEFINE
 #include "game.h"
 
-/* state_g is pointed to a zero-initialized buffer in hotreload.c. */
+/* state_g is pointed to a zero-initialized buffer in hotreload.c, or in
+   main.c depending on whether the hotreload feature is enabled.*/
 struct game_state *state_g = (struct game_state *) 0xDEAD;
 
 void game_tick()
